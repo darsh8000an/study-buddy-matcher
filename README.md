@@ -169,25 +169,62 @@ npm run test:e2e
 - `PUT /api/matches/:id/accept` - Accept match request
 - `PUT /api/matches/:id/decline` - Decline match request
 
-## Development Workflow
+## Git Branch Workflow
 
-1. Create a feature branch
+We follow a feature branch workflow for HD-grade version control:
+
+### Branch Structure
+- `master` - Production-ready code
+- `develop` - Main development branch
+- `feature/*` - Feature-specific branches
+
+### Current Feature Branches
+- `feature/user-authentication` - User registration, login, JWT auth
+- `feature/matching-algorithm` - Smart matching engine
+- `feature/real-time-notifications` - Socket.io notifications
+- `feature/user-profile-management` - Profile CRUD operations
+- `feature/search-and-filters` - User search and filtering
+
+### Development Workflow
+
+1. **Start a new feature**
 ```bash
+git checkout develop
+git pull origin develop
 git checkout -b feature/feature-name
 ```
 
-2. Make changes and commit regularly
+2. **Make changes and commit regularly**
 ```bash
 git add .
-git commit -m "Description of changes"
+git commit -m "feat: description of changes"
 ```
 
-3. Push to remote
+3. **Push to remote**
 ```bash
 git push origin feature/feature-name
 ```
 
-4. Create Pull Request
+4. **Merge to develop when complete**
+```bash
+git checkout develop
+git merge feature/feature-name
+git push origin develop
+```
+
+5. **Release to master**
+```bash
+git checkout master
+git merge develop
+git push origin master
+```
+
+### Commit Message Convention
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `test:` - Adding/updating tests
+- `refactor:` - Code refactoring
 
 ## Troubleshooting
 

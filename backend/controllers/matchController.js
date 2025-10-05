@@ -337,23 +337,31 @@ const getMyMatches = async (req, res) => {
   try {
     const currentUser = await User.findById(req.user.id)
       .select('matches')
-      .lean()
       .populate({
         path: 'matches.userId',
-        select: 'firstName lastName email university degree yearOfStudy enrolledUnits studyPreferences',
-        options: { lean: true }
+        select: 'firstName lastName email university degree yearOfStudy enrolledUnits studyPreferences'
       });
 
-    const matches = (currentUser.matches || []).map(match => ({
-      user: match.userId,
-      status: match.status,
-      matchedAt: match.matchedAt
-    }));
+    // Filter out declined matches - only show pending and accepted
+    const matches = (currentUser.matches || [])
+      .filter(match => match.status !== 'declined')
+      .map(match => ({
+        _id: match._id,
+        user: match.userId,
+        status: match.status,
+        matchedAt: match.matchedAt
+      }));
+
+    // Prevent caching
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
 
     res.status(200).json({
       success: true,
       count: matches.length,
-      data: matches
+      data: matches,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('Get my matches error:', error);

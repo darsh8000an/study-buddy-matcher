@@ -22,10 +22,11 @@ const Matches = () => {
   const fetchMatches = async () => {
     try {
       const response = await matchAPI.getMyMatches();
+      console.log('Fetched matches:', response.data);
       setMatches(response.data.data);
     } catch (error) {
       toast.error('Error fetching matches');
-      console.error(error);
+      console.error('Fetch matches error:', error);
     } finally {
       setLoading(false);
     }
@@ -33,11 +34,17 @@ const Matches = () => {
 
   const handleAccept = async (matchId) => {
     try {
-      await matchAPI.acceptRequest(matchId);
+      console.log('Accepting match:', matchId);
+      const response = await matchAPI.acceptRequest(matchId);
+      console.log('Accept response:', response.data);
       toast.success('Match request accepted!');
-      fetchMatches();
+      // Refresh the matches list
+      await fetchMatches();
+      // Switch to Connected tab to show the newly accepted match
+      setTabValue(2);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error accepting request');
+      console.error('Accept error:', error);
     }
   };
 
@@ -45,15 +52,22 @@ const Matches = () => {
     try {
       await matchAPI.declineRequest(matchId);
       toast.info('Match request declined');
-      fetchMatches();
+      // Refresh the matches list
+      await fetchMatches();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error declining request');
+      console.error('Decline error:', error);
     }
   };
 
+  // Filter matches by status - only show pending and accepted, hide declined
   const pendingRequests = matches.filter(m => m.status === 'pending');
   const sentRequests = []; // Will be same as pending for now since we don't track direction
   const acceptedMatches = matches.filter(m => m.status === 'accepted');
+  const declinedMatches = matches.filter(m => m.status === 'declined');
+
+  console.log('All matches:', matches);
+  console.log('Pending:', pendingRequests.length, 'Accepted:', acceptedMatches.length, 'Declined:', declinedMatches.length);
 
   if (loading) {
     return (
@@ -83,7 +97,7 @@ const Matches = () => {
 
       <Tabs
         value={tabValue}
-        onChange={(e, newValue) => setTabValue(newValue)}
+        onChange={(_e, newValue) => setTabValue(newValue)}
         sx={{
           mb: 3,
           borderBottom: 1,

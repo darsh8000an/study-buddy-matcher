@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5002/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
+
+// Disable caching for all requests
+axios.defaults.headers.common['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+axios.defaults.headers.common['Pragma'] = 'no-cache';
+axios.defaults.headers.common['Expires'] = '0';
 
 // Auth endpoints
 export const authAPI = {
@@ -24,7 +29,9 @@ export const userAPI = {
 // Match endpoints
 export const matchAPI = {
   getSuggestions: () => axios.get(`${API_BASE_URL}/matches/suggestions`),
-  getMyMatches: () => axios.get(`${API_BASE_URL}/matches`),
+  getMyMatches: () => axios.get(`${API_BASE_URL}/matches`, {
+    params: { _t: new Date().getTime() } // Cache busting
+  }),
   sendRequest: (recipientId, message) =>
     axios.post(`${API_BASE_URL}/matches/request`, { recipientId, message }),
   acceptRequest: (matchId) => axios.put(`${API_BASE_URL}/matches/${matchId}/accept`),
